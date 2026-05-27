@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест про Викторию — общий рейтинг</title>
+    <title>Квест про Викторию</title>
     <style>
         * {
             box-sizing: border-box;
@@ -136,10 +136,6 @@
             background: #fff1b5;
             font-weight: bold;
         }
-        .btn-reset {
-            background: #ffb347;
-            margin-top: 20px;
-        }
         .success {
             background: #d4edda;
             color: #155724;
@@ -183,19 +179,19 @@
 </head>
 <body>
 <div class="container" id="app">
-    <div class="loading">⏳ Загрузка рейтинга...</div>
+    <div class="loading">⏳ Загрузка...</div>
 </div>
 
 <script>
-    // ✅ ТВОЯ ССЫЛКА ИЗ GOOGLE APPS SCRIPT (ВСТАВЛЕНА)
+    // 👇 ТВОЯ НОВАЯ ССЫЛКА
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywsp3rpG7QFqVfWUI99ZF-qY1t6we-MZ-wkv1AIBoGFQsofRG8t5TjzR-zWcurR1allg/exec";
-
+    
     const QUESTIONS = [
         {
             text: "Какой год рождения у Виктории?",
             image: "dr.jpg",
             options: ["2001", "2000", "2003", "2002"],
-            correct: 1
+            correct: 
         },
         {
             text: "Какое любимое блюдо Виктории?",
@@ -214,8 +210,7 @@
             image: "napitoc.jpg",
             options: ["Зеленый смузи", "Кофейный напиток с пенкой", "Пиво", "Вода"],
             correct: 2
-        },
-
+        }
     ];
 
     const BIRTHDAY_PERSON = "Виктория";
@@ -229,23 +224,31 @@
     let gameFinished = false;
     let isLoading = true;
 
-    // Загрузить рейтинг из Google Sheets
     async function loadLeaderboard() {
         try {
-            const response = await fetch(SCRIPT_URL);
+            console.log("Загружаю рейтинг из:", SCRIPT_URL);
+            const response = await fetch(SCRIPT_URL, {
+                mode: 'cors',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
             const data = await response.json();
+            console.log("Данные из таблицы:", data);
+            
             const playerScores = {};
             if (Array.isArray(data)) {
                 data.forEach(entry => {
                     const name = entry.playerName;
                     const score = entry.score;
-                    if (!playerScores[name] || playerScores[name] < score) {
+                    if (name && (!playerScores[name] || playerScores[name] < score)) {
                         playerScores[name] = score;
                     }
                 });
             }
             leaderboard = Object.entries(playerScores).map(([name, score]) => ({ name, score }));
             leaderboard.sort((a,b) => b.score - a.score);
+            console.log("Рейтинг загружен:", leaderboard);
         } catch(e) {
             console.error("Ошибка загрузки рейтинга:", e);
             leaderboard = [];
@@ -254,21 +257,25 @@
         render();
     }
 
-    // Сохранить результат в Google Sheets
     async function saveResult(playerName, score, totalQuestions) {
         try {
+            console.log("Сохраняю результат:", { playerName, score, totalQuestions });
             const response = await fetch(SCRIPT_URL, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                mode: 'cors',
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
                 body: JSON.stringify({
                     playerName: playerName,
                     score: score,
                     totalQuestions: totalQuestions
                 })
             });
-            const result = await response.text();
+            const result = await response.json();
             console.log("Результат сохранения:", result);
-            return true;
+            return result.success === true;
         } catch(e) {
             console.error("Ошибка сохранения:", e);
             return false;
@@ -278,15 +285,10 @@
     function renderLeaderboard() {
         if(isLoading) return "<p>⏳ Загрузка...</p>";
         if(leaderboard.length === 0) return "<p>✨ Пока никто не прошёл квест. Будь первым! ✨</p>";
-        let html = `<table class="rating-table">
-                        <table><th>🏅 Место</th><th>Имя</th><th>⭐ Баллы</th></tr>`;
+        let html = `<table class="rating-table"><tr><th>🏅 Место</th><th>Имя</th><th>⭐ Баллы</th></tr>`;
         leaderboard.forEach((player, idx) => {
             let rankClass = idx === 0 ? "rank-1" : "";
-            html += `<tr class="${rankClass}">
-                        <td>${idx+1}</td>
-                        <td>${player.name}</td>
-                        <td>${player.score} / ${QUESTIONS.length}</td>
-                      </tr>`;
+            html += `<tr class="${rankClass}"><td>${idx+1}</td><td>${player.name}</td><td>${player.score} / ${QUESTIONS.length}</td></tr>`;
         });
         html += `</table>`;
         return html;
@@ -295,16 +297,15 @@
     async function render() {
         const app = document.getElementById("app");
         
-        // Страница регистрации
         if(!currentPlayer || (gameFinished === false && gameActive === false)) {
             app.innerHTML = `
-                <img class="hero-photo" src="${REGISTRATION_PHOTO}" alt="Виктория" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
+                <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
                 <div class="content">
                     <h1>🎂 Квест про ${BIRTHDAY_PERSON}! 🎉</h1>
                     <div class="sub">Ответь на вопросы и попади в рейтинг</div>
                     <div class="form-group">
                         <label>👋 Как тебя зовут?</label>
-                        <input type="text" id="playerNameInput" placeholder="Напиши своё имя" autocomplete="off">
+                        <input type="text" id="playerNameInput" placeholder="Напиши своё имя">
                     </div>
                     <button id="startGameBtn">🚀 Начать квест</button>
                     <hr style="margin: 30px 0 20px">
@@ -316,12 +317,9 @@
             const startBtn = document.getElementById("startGameBtn");
             const nameInput = document.getElementById("playerNameInput");
             if(startBtn) {
-                startBtn.addEventListener("click", async () => {
+                startBtn.onclick = async () => {
                     const name = nameInput.value.trim();
-                    if(name === "") {
-                        alert("Напиши своё имя!");
-                        return;
-                    }
+                    if(!name) { alert("Напиши своё имя!"); return; }
                     if(leaderboard.find(p => p.name === name)) {
                         alert(`Игрок "${name}" уже проходил квест!`);
                         return;
@@ -332,22 +330,21 @@
                     gameActive = true;
                     gameFinished = false;
                     render();
-                });
+                };
             }
         }
-        // Страница вопросов
         else if(gameActive === true && gameFinished === false) {
             const q = QUESTIONS[currentQuestionIndex];
             app.innerHTML = `
                 <div class="content" style="padding-top:24px;">
                     <div class="player-header">
-                        <span style="font-weight:bold; font-size:1.2rem;">🎈 ${currentPlayer}</span>
+                        <span style="font-weight:bold;">🎈 ${currentPlayer}</span>
                         <span class="score-badge">⭐ ${playerScore} / ${QUESTIONS.length}</span>
                     </div>
                     <div class="question-card">
                         <div class="question-text">❓ ${q.text}</div>
                         <div class="question-img">
-                            <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'" alt="картинка">
+                            <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
                         </div>
                         <div class="options" id="optionsContainer"></div>
                     </div>
@@ -360,25 +357,28 @@
                     const btn = document.createElement("button");
                     btn.innerText = opt;
                     btn.classList.add("option-btn");
-                    btn.addEventListener("click", async () => {
-                        const isCorrect = (idx === q.correct);
-                        if(isCorrect) playerScore++;
+                    btn.onclick = async () => {
+                        if(idx === q.correct) playerScore++;
                         if(currentQuestionIndex + 1 < QUESTIONS.length) {
                             currentQuestionIndex++;
                             render();
                         } else {
                             gameFinished = true;
                             gameActive = false;
-                            await saveResult(currentPlayer, playerScore, QUESTIONS.length);
+                            const saved = await saveResult(currentPlayer, playerScore, QUESTIONS.length);
+                            if(saved) {
+                                console.log("Результат сохранен!");
+                            } else {
+                                console.log("Не удалось сохранить результат");
+                            }
                             await loadLeaderboard();
                             render();
                         }
-                    });
+                    };
                     optsDiv.appendChild(btn);
                 });
             }
         }
-        // Страница результатов
         else if(gameFinished === true) {
             app.innerHTML = `
                 <div class="content">
@@ -391,20 +391,18 @@
                         <hr style="margin: 30px 0 20px">
                         <h3>🏆 Рейтинг всех участников</h3>
                         ${renderLeaderboard()}
-                        <footer>Поделись QR-кодом с друзьями! 🎂</footer>
+                        <footer>🎂 Поделись QR-кодом с друзьями!</footer>
                     </div>
                 </div>
             `;
             const resetBtn = document.getElementById("resetToStartBtn");
             if(resetBtn) {
-                resetBtn.addEventListener("click", () => {
+                resetBtn.onclick = () => {
                     currentPlayer = null;
                     gameActive = false;
                     gameFinished = false;
-                    playerScore = 0;
-                    currentQuestionIndex = 0;
                     render();
-                });
+                };
             }
         }
     }
