@@ -187,16 +187,15 @@
 </div>
 
 <script>
-    // ⚠️ ЗАМЕНИ ЭТУ ССЫЛКУ НА СВОЮ ИЗ GOOGLE APPS SCRIPT ⚠️
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1kCAGOq-jOycBf0WxQZpGF0lJX7ErdW9REBEm3_OdZ_IP4gaw9pB3OVzsZf74YqltDA/exec"; // Сюда вставь ссылку из шага 1
-    
-    // ========== ВОПРОСЫ ==========
+    // ✅ ТВОЯ ССЫЛКА ИЗ GOOGLE APPS SCRIPT (ВСТАВЛЕНА)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywsp3rpG7QFqVfWUI99ZF-qY1t6we-MZ-wkv1AIBoGFQsofRG8t5TjzR-zWcurR1allg/exec";
+
     const QUESTIONS = [
         {
             text: "Какой год рождения у Виктории?",
             image: "dr.jpg",
             options: ["2001", "2000", "2003", "2002"],
-            correct: 0
+            correct: 1
         },
         {
             text: "Какое любимое блюдо Виктории?",
@@ -207,21 +206,16 @@
         {
             text: "Кем хотела стать Виктория в детстве?",
             image: "mechta.jpg",
-            options: ["Спасателем", "Статуей свободы в США", "Учиителем", "Женщиной Кошкой", "Фото-моделью"],
+            options: ["Спасателем", "Статуей свободы в США", "Учителем", "Женщиной Кошкой", "Фото-моделью"],
             correct: 2
         },
         {
-            text: "какой у Вики любимый напиток?",
+            text: "Какой у Вики любимый напиток?",
             image: "napitoc.jpg",
-            options: ["Зеленый смузи", "Кофейный напиток с пенкой ", "Пиво", ""],
+            options: ["Зеленый смузи", "Кофейный напиток с пенкой", "Пиво", "Вода"],
             correct: 2
         },
-        {
-            text: "?",
-            image: "",
-            options: [""],
-            correct: 1
-        }
+
     ];
 
     const BIRTHDAY_PERSON = "Виктория";
@@ -240,15 +234,16 @@
         try {
             const response = await fetch(SCRIPT_URL);
             const data = await response.json();
-            // Агрегируем очки по игрокам (если кто-то прошёл несколько раз — берём лучший)
             const playerScores = {};
-            data.forEach(entry => {
-                const name = entry.playerName;
-                const score = entry.score;
-                if (!playerScores[name] || playerScores[name] < score) {
-                    playerScores[name] = score;
-                }
-            });
+            if (Array.isArray(data)) {
+                data.forEach(entry => {
+                    const name = entry.playerName;
+                    const score = entry.score;
+                    if (!playerScores[name] || playerScores[name] < score) {
+                        playerScores[name] = score;
+                    }
+                });
+            }
             leaderboard = Object.entries(playerScores).map(([name, score]) => ({ name, score }));
             leaderboard.sort((a,b) => b.score - a.score);
         } catch(e) {
@@ -262,9 +257,8 @@
     // Сохранить результат в Google Sheets
     async function saveResult(playerName, score, totalQuestions) {
         try {
-            await fetch(SCRIPT_URL, {
+            const response = await fetch(SCRIPT_URL, {
                 method: "POST",
-                mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     playerName: playerName,
@@ -272,8 +266,12 @@
                     totalQuestions: totalQuestions
                 })
             });
+            const result = await response.text();
+            console.log("Результат сохранения:", result);
+            return true;
         } catch(e) {
             console.error("Ошибка сохранения:", e);
+            return false;
         }
     }
 
@@ -281,7 +279,7 @@
         if(isLoading) return "<p>⏳ Загрузка...</p>";
         if(leaderboard.length === 0) return "<p>✨ Пока никто не прошёл квест. Будь первым! ✨</p>";
         let html = `<table class="rating-table">
-                        <tr><th>🏅 Место</th><th>Имя</th><th>⭐ Баллы</th></tr>`;
+                        <table><th>🏅 Место</th><th>Имя</th><th>⭐ Баллы</th></tr>`;
         leaderboard.forEach((player, idx) => {
             let rankClass = idx === 0 ? "rank-1" : "";
             html += `<tr class="${rankClass}">
@@ -312,7 +310,7 @@
                     <hr style="margin: 30px 0 20px">
                     <h3>🏆 Рейтинг участников (общий)</h3>
                     ${renderLeaderboard()}
-                    <footer>Каждый может пройти квест один раз ✨</footer>
+                    <footer>✨ Все результаты сохраняются в Google Таблицу ✨</footer>
                 </div>
             `;
             const startBtn = document.getElementById("startGameBtn");
@@ -324,7 +322,6 @@
                         alert("Напиши своё имя!");
                         return;
                     }
-                    // Проверяем, не проходил ли уже
                     if(leaderboard.find(p => p.name === name)) {
                         alert(`Игрок "${name}" уже проходил квест!`);
                         return;
