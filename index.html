@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Квест про Викторию</title>
+    <title>Квест про Викторию — общий рейтинг</title>
     <style>
         * {
             box-sizing: border-box;
@@ -26,14 +26,12 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.2);
             overflow: hidden;
             padding: 0 0 36px 0;
-            transition: all 0.2s;
         }
         .hero-photo {
             width: 100%;
             height: 280px;
             object-fit: cover;
             object-position: center;
-            display: block;
         }
         .content {
             padding: 24px 28px 0 28px;
@@ -41,7 +39,6 @@
         h1 {
             text-align: center;
             color: #c23b6b;
-            font-size: 2rem;
             margin-top: 0;
             margin-bottom: 8px;
         }
@@ -49,7 +46,6 @@
             text-align: center;
             color: #e86a92;
             margin-bottom: 28px;
-            font-size: 1.1rem;
         }
         .form-group {
             margin-bottom: 20px;
@@ -66,12 +62,6 @@
             font-size: 1rem;
             border-radius: 60px;
             border: 2px solid #f0c0d0;
-            transition: 0.2s;
-        }
-        input:focus {
-            outline: none;
-            border-color: #e86a92;
-            box-shadow: 0 0 0 3px rgba(232,106,146,0.2);
         }
         button {
             background: #e86a92;
@@ -79,18 +69,15 @@
             font-weight: bold;
             border: none;
             cursor: pointer;
-            margin-top: 10px;
         }
         button:hover {
             background: #c23b6b;
-            transform: scale(0.98);
         }
         .question-card {
             background: #fff5f8;
             border-radius: 32px;
             padding: 20px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         }
         .question-text {
             font-size: 1.5rem;
@@ -110,7 +97,6 @@
             max-height: 350px;
             object-fit: contain;
             border-radius: 24px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
         .options {
             display: flex;
@@ -128,12 +114,9 @@
             font-weight: 600;
             color: #4a2035;
             cursor: pointer;
-            transition: 0.2s;
         }
         .option-btn:hover {
             background: #ffe0ea;
-            border-color: #e86a92;
-            transform: scale(1.01);
         }
         .rating-table {
             width: 100%;
@@ -147,7 +130,6 @@
         }
         .rating-table th {
             background: #ffeef4;
-            border-radius: 20px;
             color: #a52a5a;
         }
         .rank-1 {
@@ -170,13 +152,11 @@
             text-align: center;
             margin-top: 30px;
             color: #bbb;
-            padding: 0 20px;
         }
         .score-badge {
             background: #e86a92;
             padding: 6px 14px;
             border-radius: 40px;
-            font-weight: bold;
             color: white;
             display: inline-block;
         }
@@ -189,21 +169,28 @@
             padding: 12px 20px;
             border-radius: 60px;
         }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #e86a92;
+        }
         @media (max-width: 550px) {
             .hero-photo { height: 200px; }
             .content { padding: 18px 20px 0 20px; }
             .question-text { font-size: 1.2rem; }
-            .question-img img { max-height: 250px; }
         }
     </style>
 </head>
 <body>
-<div class="container" id="app"></div>
+<div class="container" id="app">
+    <div class="loading">⏳ Загрузка рейтинга...</div>
+</div>
 
 <script>
-    // ====================================================
-    // ==========   ВОПРОСЫ СО СВОИМИ КАРТИНКАМИ =========
-    // ====================================================
+    // ⚠️ ЗАМЕНИ ЭТУ ССЫЛКУ НА СВОЮ ИЗ GOOGLE APPS SCRIPT ⚠️
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1kCAGOq-jOycBf0WxQZpGF0lJX7ErdW9REBEm3_OdZ_IP4gaw9pB3OVzsZf74YqltDA/exec"; // Сюда вставь ссылку из шага 1
+    
+    // ========== ВОПРОСЫ ==========
     const QUESTIONS = [
         {
             text: "Какой год рождения у Виктории?",
@@ -240,85 +227,82 @@
     const BIRTHDAY_PERSON = "Виктория";
     const REGISTRATION_PHOTO = "photo_2026-05-27_20-14-07.jpg";
     
-    let leaderboard = {};
+    let leaderboard = [];
     let currentPlayer = null;
     let currentQuestionIndex = 0;
     let playerScore = 0;
     let gameActive = false;
     let gameFinished = false;
+    let isLoading = true;
 
-    function loadLeaderboard() {
-        const stored = localStorage.getItem("birthday_leaderboard");
-        if(stored) {
-            try {
-                leaderboard = JSON.parse(stored);
-            } catch(e) {}
-        }
-        if(!leaderboard) leaderboard = {};
-    }
-
-    function saveLeaderboard() {
-        localStorage.setItem("birthday_leaderboard", JSON.stringify(leaderboard));
-    }
-
-    function saveGameState() {
-        if(currentPlayer && gameActive && !gameFinished) {
-            const state = {
-                playerName: currentPlayer,
-                score: playerScore,
-                qIndex: currentQuestionIndex,
-                finished: false
-            };
-            localStorage.setItem("birthday_game_state", JSON.stringify(state));
-        } else {
-            localStorage.removeItem("birthday_game_state");
-        }
-    }
-
-    function loadGameState() {
-        const saved = localStorage.getItem("birthday_game_state");
-        if(saved) {
-            try {
-                const state = JSON.parse(saved);
-                if(state && !state.finished && leaderboard[state.playerName] === undefined) {
-                    currentPlayer = state.playerName;
-                    playerScore = state.score;
-                    currentQuestionIndex = state.qIndex;
-                    gameActive = true;
-                    gameFinished = false;
-                    return true;
+    // Загрузить рейтинг из Google Sheets
+    async function loadLeaderboard() {
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            // Агрегируем очки по игрокам (если кто-то прошёл несколько раз — берём лучший)
+            const playerScores = {};
+            data.forEach(entry => {
+                const name = entry.playerName;
+                const score = entry.score;
+                if (!playerScores[name] || playerScores[name] < score) {
+                    playerScores[name] = score;
                 }
-            } catch(e) {}
+            });
+            leaderboard = Object.entries(playerScores).map(([name, score]) => ({ name, score }));
+            leaderboard.sort((a,b) => b.score - a.score);
+        } catch(e) {
+            console.error("Ошибка загрузки рейтинга:", e);
+            leaderboard = [];
         }
-        return false;
+        isLoading = false;
+        render();
+    }
+
+    // Сохранить результат в Google Sheets
+    async function saveResult(playerName, score, totalQuestions) {
+        try {
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    playerName: playerName,
+                    score: score,
+                    totalQuestions: totalQuestions
+                })
+            });
+        } catch(e) {
+            console.error("Ошибка сохранения:", e);
+        }
     }
 
     function renderLeaderboard() {
-        const sorted = Object.entries(leaderboard).sort((a,b) => b[1] - a[1]);
-        if(sorted.length === 0) return "<p>✨ Пока никто не прошёл квест. Будь первым! ✨</p>";
+        if(isLoading) return "<p>⏳ Загрузка...</p>";
+        if(leaderboard.length === 0) return "<p>✨ Пока никто не прошёл квест. Будь первым! ✨</p>";
         let html = `<table class="rating-table">
                         <tr><th>🏅 Место</th><th>Имя</th><th>⭐ Баллы</th></tr>`;
-        sorted.forEach(([name, score], idx) => {
+        leaderboard.forEach((player, idx) => {
             let rankClass = idx === 0 ? "rank-1" : "";
             html += `<tr class="${rankClass}">
                         <td>${idx+1}</td>
-                        <td>${name}</td>
-                        <td>${score} / ${QUESTIONS.length}</td>
+                        <td>${player.name}</td>
+                        <td>${player.score} / ${QUESTIONS.length}</td>
                       </tr>`;
         });
         html += `</table>`;
         return html;
     }
 
-    function render() {
+    async function render() {
         const app = document.getElementById("app");
         
-        // ЭКРАН РЕГИСТРАЦИИ
+        // Страница регистрации
         if(!currentPlayer || (gameFinished === false && gameActive === false)) {
             app.innerHTML = `
                 <img class="hero-photo" src="${REGISTRATION_PHOTO}" alt="Виктория" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
                 <div class="content">
-                    <h1>🎂 Квест что ты знаешь про ${BIRTHDAY_PERSON}! 🎉</h1>
+                    <h1>🎂 Квест про ${BIRTHDAY_PERSON}! 🎉</h1>
                     <div class="sub">Ответь на вопросы и попади в рейтинг</div>
                     <div class="form-group">
                         <label>👋 Как тебя зовут?</label>
@@ -326,22 +310,23 @@
                     </div>
                     <button id="startGameBtn">🚀 Начать квест</button>
                     <hr style="margin: 30px 0 20px">
-                    <h3>🏆 Рейтинг участников</h3>
+                    <h3>🏆 Рейтинг участников (общий)</h3>
                     ${renderLeaderboard()}
-                    <footer>Каждый игрок может пройти квест только один раз ✨</footer>
+                    <footer>Каждый может пройти квест один раз ✨</footer>
                 </div>
             `;
             const startBtn = document.getElementById("startGameBtn");
             const nameInput = document.getElementById("playerNameInput");
             if(startBtn) {
-                startBtn.addEventListener("click", () => {
+                startBtn.addEventListener("click", async () => {
                     const name = nameInput.value.trim();
                     if(name === "") {
                         alert("Напиши своё имя!");
                         return;
                     }
-                    if(leaderboard[name] !== undefined) {
-                        alert(`Игрок "${name}" уже проходил квест! Рейтинг не меняется.`);
+                    // Проверяем, не проходил ли уже
+                    if(leaderboard.find(p => p.name === name)) {
+                        alert(`Игрок "${name}" уже проходил квест!`);
                         return;
                     }
                     currentPlayer = name;
@@ -349,12 +334,11 @@
                     playerScore = 0;
                     gameActive = true;
                     gameFinished = false;
-                    saveGameState();
                     render();
                 });
             }
         }
-        // ЭКРАН ВОПРОСОВ — БОЛЬШИЕ КАРТИНКИ
+        // Страница вопросов
         else if(gameActive === true && gameFinished === false) {
             const q = QUESTIONS[currentQuestionIndex];
             app.innerHTML = `
@@ -366,13 +350,11 @@
                     <div class="question-card">
                         <div class="question-text">❓ ${q.text}</div>
                         <div class="question-img">
-                            <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'" alt="смешная картинка">
+                            <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'" alt="картинка">
                         </div>
                         <div class="options" id="optionsContainer"></div>
                     </div>
-                    <div style="text-align:center; color:#a52a5a; margin-top:10px;">
-                        Вопрос ${currentQuestionIndex+1} из ${QUESTIONS.length}
-                    </div>
+                    <div style="text-align:center; color:#a52a5a;">Вопрос ${currentQuestionIndex+1} из ${QUESTIONS.length}</div>
                 </div>
             `;
             const optsDiv = document.getElementById("optionsContainer");
@@ -381,19 +363,17 @@
                     const btn = document.createElement("button");
                     btn.innerText = opt;
                     btn.classList.add("option-btn");
-                    btn.addEventListener("click", () => {
+                    btn.addEventListener("click", async () => {
                         const isCorrect = (idx === q.correct);
                         if(isCorrect) playerScore++;
                         if(currentQuestionIndex + 1 < QUESTIONS.length) {
                             currentQuestionIndex++;
-                            saveGameState();
                             render();
                         } else {
                             gameFinished = true;
                             gameActive = false;
-                            leaderboard[currentPlayer] = playerScore;
-                            saveLeaderboard();
-                            localStorage.removeItem("birthday_game_state");
+                            await saveResult(currentPlayer, playerScore, QUESTIONS.length);
+                            await loadLeaderboard();
                             render();
                         }
                     });
@@ -401,21 +381,16 @@
                 });
             }
         }
-        // ЭКРАН РЕЗУЛЬТАТОВ
-        else if(gameFinished === true || (gameActive === false && currentPlayer && leaderboard[currentPlayer] !== undefined)) {
-            const finalScore = leaderboard[currentPlayer];
-            const sorted = Object.entries(leaderboard).sort((a,b) => b[1] - a[1]);
-            let rank = sorted.findIndex(([name]) => name === currentPlayer) + 1;
-            const totalPlayers = sorted.length;
+        // Страница результатов
+        else if(gameFinished === true) {
             app.innerHTML = `
                 <div class="content">
                     <div style="text-align:center;">
                         <h1>🎉 Поздравляем, ${currentPlayer}! 🎉</h1>
                         <div class="success">
-                            Твой результат: ${finalScore} из ${QUESTIONS.length}<br>
-                            🏅 Ты занял${rank === 1 ? " 1-е" : rank === 2 ? " 2-е" : rank === 3 ? " 3-е" : ` ${rank}-е`} место из ${totalPlayers} участников!
+                            Твой результат: ${playerScore} из ${QUESTIONS.length}
                         </div>
-                        <button id="resetToStartBtn" class="btn-reset">🔁 Главное меню</button>
+                        <button id="resetToStartBtn" style="margin-top:20px;">🔁 Главное меню</button>
                         <hr style="margin: 30px 0 20px">
                         <h3>🏆 Рейтинг всех участников</h3>
                         ${renderLeaderboard()}
@@ -431,27 +406,13 @@
                     gameFinished = false;
                     playerScore = 0;
                     currentQuestionIndex = 0;
-                    localStorage.removeItem("birthday_game_state");
                     render();
                 });
             }
-        } else {
-            currentPlayer = null;
-            render();
         }
     }
 
     loadLeaderboard();
-    const loaded = loadGameState();
-    if(!loaded) {
-        currentPlayer = null;
-        gameActive = false;
-        gameFinished = false;
-    }
-    render();
 </script>
 </body>
 </html>
-<div style="position: fixed; bottom: 10px; right: 10px; opacity: 0.3;">
-    <button onclick="localStorage.clear(); location.reload();" style="background:red; color:white; padding:5px 10px; font-size:12px;">🧹 СБРОС (для админа)</button>
-</div>
