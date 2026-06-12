@@ -89,13 +89,29 @@
             border-radius: 30px;
         }
         .question-media {
-            text-align: center;
             margin: 20px 0;
         }
-        .question-media img,
-        .question-media video {
+        .media-dual {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+        }
+        .media-dual > * {
+            flex: 1;
+            min-width: 0;
+        }
+        .media-dual img,
+        .media-dual video {
             width: 100%;
-            max-height: 350px;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 20px;
+        }
+        .media-single img,
+        .media-single video {
+            width: 100%;
+            max-height: 300px;
             object-fit: contain;
             border-radius: 24px;
         }
@@ -180,6 +196,13 @@
             .hero-photo { height: 200px; }
             .content { padding: 18px 20px 0 20px; }
             .question-text { font-size: 1.2rem; }
+            .media-dual {
+                flex-direction: column;
+            }
+            .media-dual img,
+            .media-dual video {
+                max-height: 180px;
+            }
         }
     </style>
 </head>
@@ -238,7 +261,7 @@
         {
             text: "Какое хобби у Виктории?",
             image: "hobby.jpg",
-            video: "tanec.mp4"
+            video: "tanec.mp4",
             options: ["Болтать по телефону", "Рисование", "Фотография", "Танцы", "Сладко спать"],
             correct: 1
         },
@@ -270,7 +293,7 @@
             text: "Какую страну Вика хотела бы посетить в первую очередь?",
             image: "holydays.jpg",
             options: ["Индонезия (Бали)", "Китай", "Испания", "Франция", "Италия"],
-            correct: 1
+            correct: 0
         }
     ];
 
@@ -285,15 +308,38 @@
     let answerLocked = false;
 
     function renderMedia(q) {
-        if (q.video) {
-            return `<video autoplay loop muted playsinline>
+        const hasVideo = q.video && q.video.trim() !== "";
+        const hasImage = q.image && q.image.trim() !== "";
+        
+        if (hasVideo && hasImage) {
+            return `
+                <div class="media-dual">
+                    <video autoplay loop muted playsinline>
                         <source src="${q.video}" type="video/mp4">
-                        <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
-                    </video>`;
-        } else if (q.image) {
-            return `<img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">`;
+                    </video>
+                    <img src="${q.image}" onerror="this.src='https://placehold.co/300x200/f5a0b5/white?text=ФОТО'">
+                </div>
+            `;
+        } else if (hasVideo) {
+            return `
+                <div class="media-single">
+                    <video autoplay loop muted playsinline>
+                        <source src="${q.video}" type="video/mp4">
+                    </video>
+                </div>
+            `;
+        } else if (hasImage) {
+            return `
+                <div class="media-single">
+                    <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
+                </div>
+            `;
         }
-        return `<img src="https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ">`;
+        return `
+            <div class="media-single">
+                <img src="https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ">
+            </div>
+        `;
     }
 
     function render() {
