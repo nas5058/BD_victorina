@@ -33,6 +33,12 @@
             object-fit: cover;
             object-position: center;
         }
+        .hero-video {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            object-position: center;
+        }
         .content {
             padding: 24px 28px 0 28px;
         }
@@ -88,11 +94,12 @@
             padding: 12px 18px;
             border-radius: 30px;
         }
-        .question-img {
+        .question-media {
             text-align: center;
             margin: 20px 0;
         }
-        .question-img img {
+        .question-media img,
+        .question-media video {
             width: 100%;
             max-height: 350px;
             object-fit: contain;
@@ -114,9 +121,32 @@
             font-weight: 600;
             color: #4a2035;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
         }
-        .option-btn:hover {
+        .option-btn:hover:not(.disabled) {
             background: #ffe0ea;
+            transform: scale(1.01);
+        }
+        .option-btn.correct {
+            background: #a5d6a5;
+            border-color: #2e7d32;
+            color: #1b5e20;
+        }
+        .option-btn.wrong {
+            background: #ef9a9a;
+            border-color: #c62828;
+            color: #b71c1c;
+        }
+        .option-btn.disabled {
+            cursor: default;
+            opacity: 0.9;
+        }
+        .check-icon {
+            font-size: 1.3rem;
+            font-weight: bold;
         }
         .rating-table {
             width: 100%;
@@ -170,6 +200,10 @@
             padding: 20px;
             color: #e86a92;
         }
+        .next-btn {
+            margin-top: 20px;
+            background: #764ba2;
+        }
         @media (max-width: 550px) {
             .hero-photo { height: 200px; }
             .content { padding: 18px 20px 0 20px; }
@@ -184,6 +218,8 @@
 
 <script>
     // ========== ВОПРОСЫ ==========
+    // Для видео: вместо image используй video и укажи путь к .mp4 файлу
+    // Например: video: "cartoon.mp4"
     const QUESTIONS = [
         {
             text: "Какой год рождения у Виктории?",
@@ -193,7 +229,8 @@
         },
         {
             text: "Какое любимое блюдо Виктории?",
-            image: "foot.jpg",
+            video: "foot.mp4",  // пример с видео
+            image: "foot.jpg",  // fallback, если видео не загрузится
             options: ["раки", "ребрышки гриль", "рыба на мангале", "сладости", "хинкали"],
             correct: 0
         },
@@ -217,6 +254,7 @@
         },
         {
             text: "Какой любимый мультфильм детства?",
+            video: "cartoon.mp4",  // видео к этому вопросу
             image: "cartoon.jpg",
             options: ["Шрек", "Король Лев", "Холодное сердце", "Робин Гуд"],
             correct: 0
@@ -230,19 +268,19 @@
         {
             text: "Какое хобби у Виктории?",
             image: "hobby.jpg",
-            options: ["Болтать по телефону", "Рисовать картиночки по номерам", "Фотографировать, фотографироваться", "Танцевать когда хорошее настроение", "Сладко спать"],
+            options: ["Болтать по телефону", "Рисование", "Фотография", "Танцы", "Сладко спать"],
             correct: 1
         },
         {
             text: "Какой жанр фильмов Вика любит больше всего?",
             image: "movie.jpg",
             options: ["Комедии", "Триллеры", "Детектив", "Фантастика"],
-            correct: 2
+            correct: 0
         },
         {
             text: "Лучшее свидание по мнению Виктории",
             image: "svidanka.jpg",
-            options: ["Все традиционно: ужин, цветы, красивые фото на крыше", "Что-то не обычное: ужин на автомойке", "Спортивное: прогулка на конях", "Мастер-класс: лепка из глины"],
+            options: ["Все традиционно: ужин, цветы красивые фотографии", "Что-то не обычное: ужин на автомойке", "Спортивное: прогулка на конях", "Мастер-класс: лепка из глины"],
             correct: 0
         },
         {
@@ -257,6 +295,12 @@
             options: ["Упрямство", "Чувство юмора", "Застенчивость", "Терпеливость", "Доброта"],
             correct: 0
         }
+        {
+            text: "Какую страну Вика хотела бы посетить в первую очередь? ",
+            image: "holydays.jpg",
+            options: ["Индонезия (Бали) ", "Китай ", "Испания", "Франция", "Италия"],
+            correct: 0
+        }
     ];
 
     const BIRTHDAY_PERSON = "Виктория";
@@ -267,6 +311,19 @@
     let playerScore = 0;
     let gameActive = false;
     let gameFinished = false;
+    let answerLocked = false;  // блокировка кнопок после ответа
+
+    function renderMedia(q) {
+        if (q.video) {
+            return `<video autoplay loop muted playsinline>
+                        <source src="${q.video}" type="video/mp4">
+                        <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
+                    </video>`;
+        } else if (q.image) {
+            return `<img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">`;
+        }
+        return `<img src="https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ">`;
+    }
 
     function render() {
         const app = document.getElementById("app");
@@ -297,6 +354,7 @@
                     playerScore = 0;
                     gameActive = true;
                     gameFinished = false;
+                    answerLocked = false;
                     render();
                 };
             }
@@ -304,6 +362,8 @@
         // Страница вопросов
         else if(gameActive === true && gameFinished === false) {
             const q = QUESTIONS[currentQuestionIndex];
+            const isLast = (currentQuestionIndex === QUESTIONS.length - 1);
+            
             app.innerHTML = `
                 <div class="content" style="padding-top:24px;">
                     <div class="player-header">
@@ -312,30 +372,67 @@
                     </div>
                     <div class="question-card">
                         <div class="question-text">❓ ${q.text}</div>
-                        <div class="question-img">
-                            <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
+                        <div class="question-media">
+                            ${renderMedia(q)}
                         </div>
                         <div class="options" id="optionsContainer"></div>
                     </div>
                     <div style="text-align:center; color:#a52a5a;">Вопрос ${currentQuestionIndex+1} из ${QUESTIONS.length}</div>
                 </div>
             `;
+            
             const optsDiv = document.getElementById("optionsContainer");
             if(optsDiv) {
                 q.options.forEach((opt, idx) => {
                     const btn = document.createElement("button");
                     btn.innerText = opt;
                     btn.classList.add("option-btn");
-                    btn.onclick = () => {
-                        if(idx === q.correct) playerScore++;
-                        if(currentQuestionIndex + 1 < QUESTIONS.length) {
-                            currentQuestionIndex++;
-                            render();
-                        } else {
-                            gameFinished = true;
-                            gameActive = false;
-                            render();
+                    
+                    // Если уже выбран ответ — блокируем и подсвечиваем
+                    if (answerLocked) {
+                        btn.classList.add("disabled");
+                        if (idx === q.correct) {
+                            btn.classList.add("correct");
+                            const checkSpan = document.createElement("span");
+                            checkSpan.className = "check-icon";
+                            checkSpan.innerHTML = " ✓";
+                            btn.appendChild(checkSpan);
                         }
+                        if (window.selectedAnswer !== undefined && idx === window.selectedAnswer && idx !== q.correct) {
+                            btn.classList.add("wrong");
+                            const crossSpan = document.createElement("span");
+                            crossSpan.className = "check-icon";
+                            crossSpan.innerHTML = " ✗";
+                            btn.appendChild(crossSpan);
+                        }
+                    }
+                    
+                    btn.onclick = () => {
+                        if (answerLocked) return; // уже ответили
+                        
+                        const isCorrect = (idx === q.correct);
+                        if (isCorrect) playerScore++;
+                        
+                        // Запоминаем выбранный ответ
+                        window.selectedAnswer = idx;
+                        answerLocked = true;
+                        
+                        // Перерисовываем с подсветкой
+                        render();
+                        
+                        // Автоматический переход через 1.5 секунды
+                        setTimeout(() => {
+                            if (currentQuestionIndex + 1 < QUESTIONS.length) {
+                                currentQuestionIndex++;
+                                answerLocked = false;
+                                window.selectedAnswer = undefined;
+                                render();
+                            } else {
+                                gameFinished = true;
+                                gameActive = false;
+                                render();
+                            }
+                        }, 1500);
                     };
                     optsDiv.appendChild(btn);
                 });
@@ -362,6 +459,8 @@
                     gameFinished = false;
                     playerScore = 0;
                     currentQuestionIndex = 0;
+                    answerLocked = false;
+                    window.selectedAnswer = undefined;
                     render();
                 };
             }
