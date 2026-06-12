@@ -182,8 +182,7 @@
 </div>
 
 <script>
-    // ========== ВОПРОСЫ ==========
-    // ВНИМАНИЕ: каждый объект должен быть через запятую, кроме последнего
+
     const QUESTIONS = [
         { text: "Какой год рождения у Виктории?", image: "dr.jpg", options: ["2001", "2000", "2003", "2002"], correct: 0 },
         { text: "Какое любимое блюдо Виктории?", image: "foot.jpg", options: ["раки", "ребрышки гриль", "рыба на мангале", "сладости", "хинкали"], correct: 0 },
@@ -233,12 +232,13 @@
                 <div class="content">
                     <h1>🎂 Квест про ${BIRTHDAY_PERSON}! 🎉</h1>
                     <div class="sub">Ответь на вопросы и узнай, насколько хорошо ты её знаешь!</div>
+                    <div class="sub">Внимательно смотри на картинки там могут быть подсказки(или нет🤭) </div>
                     <div class="form-group">
                         <label>👋 Как тебя зовут?</label>
                         <input type="text" id="playerNameInput" placeholder="Напиши своё имя">
                     </div>
                     <button id="startGameBtn">🚀 Начать квест</button>
-                    <footer>✨ Не забудь запомнить или заскринить свой результат ✨</footer>
+                    <div class="sub">✨ Не забудь запомнить или заскринить свой результат!! ✨</div>
                 </div>
             `;
             const startBtn = document.getElementById("startGameBtn");
