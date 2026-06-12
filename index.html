@@ -347,7 +347,7 @@
         
         if(!currentPlayer || (gameFinished === false && gameActive === false)) {
             app.innerHTML = `
-                <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
+                <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Викторию'">
                 <div class="content">
                     <h1>🎂 Квест про ${BIRTHDAY_PERSON}! 🎉</h1>
                     <div class="sub">Ответь на вопросы и узнай, насколько хорошо ты её знаешь!</div>
@@ -356,7 +356,7 @@
                         <input type="text" id="playerNameInput" placeholder="Напиши своё имя">
                     </div>
                     <button id="startGameBtn">🚀 Начать квест</button>
-                    <footer>✨ Каждый игрок проходит квест на своём телефоне ✨</footer>
+                    <footer>✨ Не забудь запомнить или заскринить свои результаты  ✨</footer>
                 </div>
             `;
             const startBtn = document.getElementById("startGameBtn");
