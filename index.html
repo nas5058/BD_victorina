@@ -89,27 +89,11 @@
             border-radius: 30px;
         }
         .question-media {
+            text-align: center;
             margin: 20px 0;
         }
-        .media-dual {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            justify-content: center;
-        }
-        .media-dual > * {
-            flex: 1;
-            min-width: 0;
-        }
-        .media-dual img,
-        .media-dual video {
-            width: 100%;
-            max-height: 200px;
-            object-fit: contain;
-            border-radius: 20px;
-        }
-        .media-single img,
-        .media-single video {
+        .question-media img,
+        .question-media video {
             width: 100%;
             max-height: 300px;
             object-fit: contain;
@@ -131,9 +115,6 @@
             font-weight: 600;
             color: #4a2035;
             cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             transition: 0.2s;
         }
         .option-btn:hover:not(.disabled) {
@@ -153,10 +134,6 @@
         .option-btn.disabled {
             cursor: default;
             opacity: 0.9;
-        }
-        .check-icon {
-            font-size: 1.3rem;
-            font-weight: bold;
         }
         .success {
             background: #d4edda;
@@ -196,13 +173,6 @@
             .hero-photo { height: 200px; }
             .content { padding: 18px 20px 0 20px; }
             .question-text { font-size: 1.2rem; }
-            .media-dual {
-                flex-direction: column;
-            }
-            .media-dual img,
-            .media-dual video {
-                max-height: 180px;
-            }
         }
     </style>
 </head>
@@ -213,86 +183,23 @@
 
 <script>
     // ========== ВОПРОСЫ ==========
+    // ВНИМАНИЕ: каждый объект должен быть через запятую, кроме последнего
     const QUESTIONS = [
-        {
-            text: "Какой год рождения у Виктории?",
-            image: "dr.jpg",
-            options: ["2001", "2000", "2003", "2002"],
-            correct: 0
-        },
-        {
-            text: "Какое любимое блюдо Виктории?",
-            video: "foot.mp4",
-            image: "foot.jpg",
-            options: ["раки", "ребрышки гриль", "рыба на мангале", "сладости", "хинкали"],
-            correct: 0
-        },
-        {
-            text: "Кем хотела стать Виктория в детстве?",
-            image: "mechta.jpg",
-            options: ["Спасателем", "Статуей свободы в США", "Учителем", "Женщиной Кошкой", "Фото-моделью"],
-            correct: 2
-        },
-        {
-            text: "Какой у Вики любимый напиток?",
-            image: "napitoc.jpg",
-            options: ["Зеленый смузи", "Кофейный напиток с пенкой", "Пиво", "Вода"],
-            correct: 0
-        },
-        {
-            text: "Как зовут маму Виктории?",
-            image: "mom.jpg",
-            options: ["Елена", "Татьяна", "Роза", "Наталья"],
-            correct: 2
-        },
-        {
-            text: "Какой любимый мультфильм детства?",
-            image: "cartoon.jpg",
-            options: ["Шрек", "Король Лев", "Холодное сердце", "Робин Гуд"],
-            correct: 3
-        },
-        {
-            text: "В каком городе родилась Виктория?",
-            image: "city.jpg",
-            options: ["Москва", "Ростов-на-Дону", "Константиновск", "Краснодар", "Курган"],
-            correct: 4
-        },
-        {
-            text: "Какое хобби у Виктории?",
-            image: "hobby.jpg",
-            video: "tanec.mp4",
-            options: ["Болтать по телефону", "Рисование", "Фотография", "Танцы", "Сладко спать"],
-            correct: 1
-        },
-        {
-            text: "Какой жанр фильмов Вика любит больше всего?",
-            image: "movie.jpg",
-            options: ["Комедии", "Триллеры", "Детектив", "Фантастика"],
-            correct: 1
-        },
-        {
-            text: "Лучшее свидание по мнению Виктории",
-            image: "svidanka.jpg",
-            options: ["Все традиционно: ужин, цветы красивые фотографии", "Что-то не обычное: ужин на автомойке", "Спортивное: прогулка на конях", "Мастер-класс: лепка из глины"],
-            correct: 0
-        },
-        {
-            text: "Какой сериал Вика пересматривала несколько раз?",
-            image: "series.jpg",
-            options: ["Друзья", "Отчаянные Домохозяйки", "Игра престолов", "Шерлок"],
-            correct: 2
-        },
-        {
-            text: "Какая черта характера у Виктории самая яркая?",
-            options: ["Упрямство", "Чувство юмора", "Застенчивость", "Терпеливость", "Доброта"],
-            correct: 4
-        },
-        {
-            text: "Какую страну Вика хотела бы посетить в первую очередь?",
-            image: "holydays.jpg",
-            options: ["Индонезия (Бали)", "Китай", "Испания", "Франция", "Италия"],
-            correct: 0
-        }
+        { text: "Какой год рождения у Виктории?", image: "dr.jpg", options: ["2001", "2000", "2003", "2002"], correct: 0 },
+        { text: "Какое любимое блюдо Виктории?", video: "foot.mp4", options: ["раки", "ребрышки гриль", "рыба на мангале", "сладости", "хинкали"], correct: 0 },
+        { text: "Кем хотела стать Виктория в детстве?", image: "mechta.jpg", options: ["Спасателем", "Статуей свободы в США", "Учителем", "Женщиной Кошкой", "Фото-моделью"], correct: 2 },
+        { text: "Какой у Вики любимый напиток?", image: "napitoc.jpg", options: ["Зеленый смузи", "Кофейный напиток с пенкой", "Пиво", "Вода"], correct: 0 },
+        { text: "Как зовут маму Виктории?", image: "mom.jpg", options: ["Елена", "Татьяна", "Роза", "Наталья"], correct: 2 },
+        { text: "Какой любимый мультфильм детства?", image: "cartoon.jpg", options: ["Шрек", "Король Лев", "Холодное сердце", "Робин Гуд"], correct: 3 },
+        { text: "В каком городе родилась Виктория?", image: "city.jpg", options: ["Москва", "Ростов-на-Дону", "Константиновск", "Краснодар", "Курган"], correct: 4 },
+        { text: "Какое хобби у Виктории?", video: "tanec.mp4", options: ["Болтать по телефону", "Рисование", "Фотография", "Танцы", "Сладко спать"], correct: 1 },
+        { text: "Какой жанр фильмов Вика любит больше всего?", image: "movie.jpg", options: ["Комедии", "Триллеры", "Детектив", "Фантастика"], correct: 1 },
+        { text: "Лучшее свидание по мнению Виктории", image: "svidanka.jpg", options: ["Все традиционно: ужин, цветы красивые фотографии", "Что-то не обычное: ужин на автомойке", "Спортивное: прогулка на конях", "Мастер-класс: лепка из глины"], correct: 0 },
+        { text: "Какой сериал Вика пересматривала несколько раз?", image: "series.jpg", options: ["Друзья", "Отчаянные Домохозяйки", "Игра престолов", "Шерлок"], correct: 2 },
+        { text: "Какая черта характера у Виктории самая яркая?",  image: "milo.jpg" options: ["Упрямство", "Чувство юмора", "Застенчивость", "Терпеливость", "Доброта"], correct: 4 },
+        { text: "Как Вика хотела бы назвать своих детей?", image: "children.jpg", options: ["Адам, Даниела,Эмилия", "Костя, Саша, Кира", "Аня, Люся, Макс", "Чучмек, Биба, Боба", "Дейенерис, Тирион, Арья"], correct: 0 } 
+        { text: "Какую страну Вика хотела бы посетить в первую очередь?", image: "holydays.jpg", options: ["Индонезия (Бали)", "Китай", "Испания", "Франция", "Италия"], correct: 0 }, 
+        
     ];
 
     const BIRTHDAY_PERSON = "Виктория";
@@ -304,48 +211,26 @@
     let gameActive = false;
     let gameFinished = false;
     let answerLocked = false;
+    let selectedAnswer = null;
 
     function renderMedia(q) {
-        const hasVideo = q.video && q.video.trim() !== "";
-        const hasImage = q.image && q.image.trim() !== "";
-        
-        if (hasVideo && hasImage) {
-            return `
-                <div class="media-dual">
-                    <video autoplay loop muted playsinline>
+        if (q.video && q.video !== "") {
+            return `<video autoplay loop muted playsinline>
                         <source src="${q.video}" type="video/mp4">
-                    </video>
-                    <img src="${q.image}" onerror="this.src='https://placehold.co/300x200/f5a0b5/white?text=ФОТО'">
-                </div>
-            `;
-        } else if (hasVideo) {
-            return `
-                <div class="media-single">
-                    <video autoplay loop muted playsinline>
-                        <source src="${q.video}" type="video/mp4">
-                    </video>
-                </div>
-            `;
-        } else if (hasImage) {
-            return `
-                <div class="media-single">
-                    <img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ'">
-                </div>
-            `;
+                        <img src="${q.image || ''}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=Видео'">
+                    </video>`;
+        } else if (q.image && q.image !== "") {
+            return `<img src="${q.image}" onerror="this.src='https://placehold.co/600x350/f5a0b5/white?text=Изображение'">`;
         }
-        return `
-            <div class="media-single">
-                <img src="https://placehold.co/600x350/f5a0b5/white?text=МЕМ+ТУТ">
-            </div>
-        `;
+        return `<div style="background:#ffeef4; border-radius:24px; padding:40px; text-align:center; color:#a52a5a;">🎬 Нет медиа</div>`;
     }
 
     function render() {
         const app = document.getElementById("app");
         
-        if(!currentPlayer || (gameFinished === false && gameActive === false)) {
+        if (!currentPlayer || (!gameActive && !gameFinished)) {
             app.innerHTML = `
-                <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Викторию'">
+                <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
                 <div class="content">
                     <h1>🎂 Квест про ${BIRTHDAY_PERSON}! 🎉</h1>
                     <div class="sub">Ответь на вопросы и узнай, насколько хорошо ты её знаешь!</div>
@@ -354,99 +239,29 @@
                         <input type="text" id="playerNameInput" placeholder="Напиши своё имя">
                     </div>
                     <button id="startGameBtn">🚀 Начать квест</button>
-                    <footer>✨ Не забудь запомнить или заскринить свои результаты  ✨</footer>
+                    <footer>✨ Не забудь запомнить или заскринить свой результат ✨</footer>
                 </div>
             `;
             const startBtn = document.getElementById("startGameBtn");
             const nameInput = document.getElementById("playerNameInput");
-            if(startBtn) {
+            if (startBtn) {
                 startBtn.onclick = () => {
                     const name = nameInput.value.trim();
-                    if(!name) { alert("Напиши своё имя!"); return; }
+                    if (!name) { alert("Напиши своё имя!"); return; }
                     currentPlayer = name;
                     currentQuestionIndex = 0;
                     playerScore = 0;
                     gameActive = true;
                     gameFinished = false;
                     answerLocked = false;
+                    selectedAnswer = null;
                     render();
                 };
             }
+            return;
         }
-        else if(gameActive === true && gameFinished === false) {
-            const q = QUESTIONS[currentQuestionIndex];
-            
-            app.innerHTML = `
-                <div class="content" style="padding-top:24px;">
-                    <div class="player-header">
-                        <span style="font-weight:bold;">🎈 ${currentPlayer}</span>
-                        <span class="score-badge">⭐ ${playerScore} / ${QUESTIONS.length}</span>
-                    </div>
-                    <div class="question-card">
-                        <div class="question-text">❓ ${q.text}</div>
-                        <div class="question-media">
-                            ${renderMedia(q)}
-                        </div>
-                        <div class="options" id="optionsContainer"></div>
-                    </div>
-                    <div style="text-align:center; color:#a52a5a;">Вопрос ${currentQuestionIndex+1} из ${QUESTIONS.length}</div>
-                </div>
-            `;
-            
-            const optsDiv = document.getElementById("optionsContainer");
-            if(optsDiv) {
-                q.options.forEach((opt, idx) => {
-                    const btn = document.createElement("button");
-                    btn.innerText = opt;
-                    btn.classList.add("option-btn");
-                    
-                    if (answerLocked) {
-                        btn.classList.add("disabled");
-                        if (idx === q.correct) {
-                            btn.classList.add("correct");
-                            const checkSpan = document.createElement("span");
-                            checkSpan.className = "check-icon";
-                            checkSpan.innerHTML = " ✓";
-                            btn.appendChild(checkSpan);
-                        }
-                        if (window.selectedAnswer !== undefined && idx === window.selectedAnswer && idx !== q.correct) {
-                            btn.classList.add("wrong");
-                            const crossSpan = document.createElement("span");
-                            crossSpan.className = "check-icon";
-                            crossSpan.innerHTML = " ✗";
-                            btn.appendChild(crossSpan);
-                        }
-                    }
-                    
-                    btn.onclick = () => {
-                        if (answerLocked) return;
-                        
-                        const isCorrect = (idx === q.correct);
-                        if (isCorrect) playerScore++;
-                        
-                        window.selectedAnswer = idx;
-                        answerLocked = true;
-                        
-                        render();
-                        
-                        setTimeout(() => {
-                            if (currentQuestionIndex + 1 < QUESTIONS.length) {
-                                currentQuestionIndex++;
-                                answerLocked = false;
-                                window.selectedAnswer = undefined;
-                                render();
-                            } else {
-                                gameFinished = true;
-                                gameActive = false;
-                                render();
-                            }
-                        }, 1500);
-                    };
-                    optsDiv.appendChild(btn);
-                });
-            }
-        }
-        else if(gameFinished === true) {
+        
+        if (gameFinished) {
             app.innerHTML = `
                 <div class="content">
                     <div style="text-align:center;">
@@ -459,7 +274,7 @@
                 </div>
             `;
             const resetBtn = document.getElementById("resetToStartBtn");
-            if(resetBtn) {
+            if (resetBtn) {
                 resetBtn.onclick = () => {
                     currentPlayer = null;
                     gameActive = false;
@@ -467,9 +282,76 @@
                     playerScore = 0;
                     currentQuestionIndex = 0;
                     answerLocked = false;
-                    window.selectedAnswer = undefined;
+                    selectedAnswer = null;
                     render();
                 };
+            }
+            return;
+        }
+        
+        if (gameActive && !gameFinished) {
+            const q = QUESTIONS[currentQuestionIndex];
+            
+            let optionsHtml = '';
+            for (let i = 0; i < q.options.length; i++) {
+                let additionalClass = '';
+                let icon = '';
+                if (answerLocked) {
+                    if (i === q.correct) {
+                        additionalClass = 'correct';
+                        icon = ' ✓';
+                    }
+                    if (selectedAnswer === i && i !== q.correct) {
+                        additionalClass = 'wrong';
+                        icon = ' ✗';
+                    }
+                }
+                optionsHtml += `<button class="option-btn ${additionalClass}" data-idx="${i}">${q.options[i]}${icon}</button>`;
+            }
+            
+            app.innerHTML = `
+                <div class="content" style="padding-top:24px;">
+                    <div class="player-header">
+                        <span style="font-weight:bold;">🎈 ${currentPlayer}</span>
+                        <span class="score-badge">⭐ ${playerScore} / ${QUESTIONS.length}</span>
+                    </div>
+                    <div class="question-card">
+                        <div class="question-text">❓ ${q.text}</div>
+                        <div class="question-media">
+                            ${renderMedia(q)}
+                        </div>
+                        <div class="options" id="optionsContainer">
+                            ${optionsHtml}
+                        </div>
+                    </div>
+                    <div style="text-align:center; color:#a52a5a;">Вопрос ${currentQuestionIndex+1} из ${QUESTIONS.length}</div>
+                </div>
+            `;
+            
+            if (!answerLocked) {
+                const btns = document.querySelectorAll('.option-btn');
+                for (let i = 0; i < btns.length; i++) {
+                    btns[i].onclick = (e) => {
+                        if (answerLocked) return;
+                        const idx = parseInt(btns[i].dataset.idx);
+                        if (idx === q.correct) playerScore++;
+                        selectedAnswer = idx;
+                        answerLocked = true;
+                        render();
+                        setTimeout(() => {
+                            if (currentQuestionIndex + 1 < QUESTIONS.length) {
+                                currentQuestionIndex++;
+                                answerLocked = false;
+                                selectedAnswer = null;
+                                render();
+                            } else {
+                                gameFinished = true;
+                                gameActive = false;
+                                render();
+                            }
+                        }, 1500);
+                    };
+                }
             }
         }
     }
