@@ -33,12 +33,6 @@
             object-fit: cover;
             object-position: center;
         }
-        .hero-video {
-            width: 100%;
-            height: 280px;
-            object-fit: cover;
-            object-position: center;
-        }
         .content {
             padding: 24px 28px 0 28px;
         }
@@ -148,24 +142,6 @@
             font-size: 1.3rem;
             font-weight: bold;
         }
-        .rating-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-        }
-        .rating-table th, .rating-table td {
-            border-bottom: 1px solid #f0c0d0;
-            padding: 12px 8px;
-            text-align: left;
-        }
-        .rating-table th {
-            background: #ffeef4;
-            color: #a52a5a;
-        }
-        .rank-1 {
-            background: #fff1b5;
-            font-weight: bold;
-        }
         .success {
             background: #d4edda;
             color: #155724;
@@ -200,10 +176,6 @@
             padding: 20px;
             color: #e86a92;
         }
-        .next-btn {
-            margin-top: 20px;
-            background: #764ba2;
-        }
         @media (max-width: 550px) {
             .hero-photo { height: 200px; }
             .content { padding: 18px 20px 0 20px; }
@@ -218,8 +190,6 @@
 
 <script>
     // ========== ВОПРОСЫ ==========
-    // Для видео: вместо image используй video и укажи путь к .mp4 файлу
-    // Например: video: "cartoon.mp4"
     const QUESTIONS = [
         {
             text: "Какой год рождения у Виктории?",
@@ -229,8 +199,8 @@
         },
         {
             text: "Какое любимое блюдо Виктории?",
-            video: "foot.mp4",  // пример с видео
-            image: "foot.jpg",  // fallback, если видео не загрузится
+            video: "foot.mp4",
+            image: "foot.jpg",
             options: ["раки", "ребрышки гриль", "рыба на мангале", "сладости", "хинкали"],
             correct: 0
         },
@@ -254,7 +224,7 @@
         },
         {
             text: "Какой любимый мультфильм детства?",
-            video: "cartoon.mp4",  // видео к этому вопросу
+            video: "cartoon.mp4",
             image: "cartoon.jpg",
             options: ["Шрек", "Король Лев", "Холодное сердце", "Робин Гуд"],
             correct: 0
@@ -294,11 +264,11 @@
             image: "character.jpg",
             options: ["Упрямство", "Чувство юмора", "Застенчивость", "Терпеливость", "Доброта"],
             correct: 0
-        }
+        },
         {
-            text: "Какую страну Вика хотела бы посетить в первую очередь? ",
+            text: "Какую страну Вика хотела бы посетить в первую очередь?",
             image: "holydays.jpg",
-            options: ["Индонезия (Бали) ", "Китай ", "Испания", "Франция", "Италия"],
+            options: ["Индонезия (Бали)", "Китай", "Испания", "Франция", "Италия"],
             correct: 0
         }
     ];
@@ -311,7 +281,7 @@
     let playerScore = 0;
     let gameActive = false;
     let gameFinished = false;
-    let answerLocked = false;  // блокировка кнопок после ответа
+    let answerLocked = false;
 
     function renderMedia(q) {
         if (q.video) {
@@ -328,7 +298,6 @@
     function render() {
         const app = document.getElementById("app");
         
-        // Страница регистрации
         if(!currentPlayer || (gameFinished === false && gameActive === false)) {
             app.innerHTML = `
                 <img class="hero-photo" src="${REGISTRATION_PHOTO}" onerror="this.src='https://placehold.co/700x280/f5a0b5/white?text=Виктория'">
@@ -359,10 +328,8 @@
                 };
             }
         }
-        // Страница вопросов
         else if(gameActive === true && gameFinished === false) {
             const q = QUESTIONS[currentQuestionIndex];
-            const isLast = (currentQuestionIndex === QUESTIONS.length - 1);
             
             app.innerHTML = `
                 <div class="content" style="padding-top:24px;">
@@ -388,7 +355,6 @@
                     btn.innerText = opt;
                     btn.classList.add("option-btn");
                     
-                    // Если уже выбран ответ — блокируем и подсвечиваем
                     if (answerLocked) {
                         btn.classList.add("disabled");
                         if (idx === q.correct) {
@@ -408,19 +374,16 @@
                     }
                     
                     btn.onclick = () => {
-                        if (answerLocked) return; // уже ответили
+                        if (answerLocked) return;
                         
                         const isCorrect = (idx === q.correct);
                         if (isCorrect) playerScore++;
                         
-                        // Запоминаем выбранный ответ
                         window.selectedAnswer = idx;
                         answerLocked = true;
                         
-                        // Перерисовываем с подсветкой
                         render();
                         
-                        // Автоматический переход через 1.5 секунды
                         setTimeout(() => {
                             if (currentQuestionIndex + 1 < QUESTIONS.length) {
                                 currentQuestionIndex++;
@@ -438,7 +401,6 @@
                 });
             }
         }
-        // Страница результатов
         else if(gameFinished === true) {
             app.innerHTML = `
                 <div class="content">
